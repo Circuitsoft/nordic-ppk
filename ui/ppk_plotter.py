@@ -7,6 +7,7 @@ from ui import ppk_settings
 import csv
 import threading
 import time
+import cProfile as profile
 
 SAMPLE_INTERVAL = 13.0e-6
 ADC_REF = 0.6
@@ -220,7 +221,7 @@ class ppk_plotter():
         return data[s < m]
 
     def start_log_thread(self):
-        self.log_thread = threading.Thread(target=self.do_logging)
+        self.log_thread = threading.Thread(target=self.p_logging)
         self.log_thread.setDaemon(True)
         self.log_thread.start()
 
@@ -333,6 +334,9 @@ class ppk_plotter():
 
             # Update the trigger window when we have filled all samples
             self.update_trig_curve = True
+
+    def p_logging(self):
+        profile.runctx("self.do_logging()", globals(), locals())
 
     def do_logging(self):
         ts = 0

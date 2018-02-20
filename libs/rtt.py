@@ -1,6 +1,7 @@
 import threading
 import time
 import os
+import cProfile as profile
 from pynrfjprog import API, Hex
 
 DEBUG = False
@@ -107,6 +108,9 @@ class rtt(object):
             print((str(e)))
             print ("Failed to write device")
             return str(e)
+
+    def p_read(self):
+	profile.runctx("self.t_read()", globals(), locals())
 
     def t_read(self):
         try:

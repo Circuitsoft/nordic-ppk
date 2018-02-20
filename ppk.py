@@ -1,46 +1,47 @@
-try:
-    import platform
-    if(platform.architecture()[0] != "32bit" and platform.system() == "Windows"):
-        print("Wrong Python architecture, please install 32bit version of Python")
+#!/usr/bin/python2
+def main():
+    try:
+        import platform
+        if(platform.architecture()[0] != "32bit" and platform.system() == "Windows"):
+            print("Wrong Python architecture, please install 32bit version of Python")
+            eval(input("Press any key to exit..."))
+            exit()
+        import PySide
+        import pynrfjprog
+        import pyqtgraph as pg
+        from pyqtgraph.Qt import QtCore, QtGui
+        import libs.rtt as rtt
+        import sys
+        # from ui import ppk_ui
+        from ui.ppk_plotter import ppk_plotter
+        import numpy as np
+        # from ui.ppk_plotter import PlotData
+        import time
+
+        # Check for python version error
+        if sys.version_info[0] != 2:
+            raise ValueError('Version error:\n \
+            Python version in use: %d.%d.%d\n \
+            PPK needs version >= 2.7.11' % (sys.version_info[0], sys.version_info[1], sys.version_info[2]))
+    except ImportError as ie:
+        print((str(ie)))
+        # Catched if any packages are missing
+        missing = str(ie).split("named")[1]
+        print(("Software needs %s installed\nPlease run pip install %s and restart\r\n" % (missing, missing)))
+        print("Make sure to use the latest version of pip, as older versions can fail to install packages correctly.")
         eval(input("Press any key to exit..."))
         exit()
-    import PySide
-    import pynrfjprog
-    import pyqtgraph as pg
-    from pyqtgraph.Qt import QtCore, QtGui
-    import libs.rtt as rtt
-    import sys
-    # from ui import ppk_ui
-    from ui.ppk_plotter import ppk_plotter
-    import numpy as np
-    # from ui.ppk_plotter import PlotData
-    import time
+    except ValueError as e:
+        print((str(e)))
+        eval(input("Press any key to exit..."))
+        exit()
 
-    # Check for python version error
-    if sys.version_info[0] != 2:
-        raise ValueError('Version error:\n \
-        Python version in use: %d.%d.%d\n \
-        PPK needs version >= 2.7.11' % (sys.version_info[0], sys.version_info[1], sys.version_info[2]))
-except ImportError as ie:
-    print((str(ie)))
-    # Catched if any packages are missing
-    missing = str(ie).split("named")[1]
-    print(("Software needs %s installed\nPlease run pip install %s and restart\r\n" % (missing, missing)))
-    print("Make sure to use the latest version of pip, as older versions can fail to install packages correctly.")
-    eval(input("Press any key to exit..."))
-    exit()
-except ValueError as e:
-    print((str(e)))
-    eval(input("Press any key to exit..."))
-    exit()
+    VERSION = "1.1.0"
+    FIRMWARE = ".\ppk_110.hex"
+    GLOBAL_OFFSET = 0.0e-6
 
-VERSION = "1.1.0"
-FIRMWARE = ".\ppk_110.hex"
-GLOBAL_OFFSET = 0.0e-6
-
-sd_versions = ['130', '132', '212', '332', '110', '210', '310']
-# Start Qt event loop unless running in interactive mode or using pyside.
-if __name__ == '__main__':
+    sd_versions = ['130', '132', '212', '332', '110', '210', '310']
+    # Start Qt event loop unless running in interactive mode or using pyside.
     print("Power Profiler Kit initializing...")
     plotter = ppk_plotter()
 
@@ -60,7 +61,7 @@ if __name__ == '__main__':
         print(("Warning: The software is tested with PySide >=1.2.4, and may not work with your version (%s)" % PySide.__version__))
     if ((pg.__version__[0] != '0') or (pg.__version__[2:4] != '10')):
         print(("Warning: The software is tested with PyQtGraph >=0.10.0, and may not work with your version (%s)" % pg.__version__))
-    if ((np.__version__[0] != '1') or (np.__version__[2:4] < '13')):
+    if ((np.__version__[0] != '1') or (np.__version__[2:4] < '12')):
         print(("Warning: The software is tested with numpy >=1.12.0, and may not work with your version (%s)" % np.__version__))
 
     ''' Connect and read all initialization data '''
@@ -193,8 +194,13 @@ if __name__ == '__main__':
     plotter.setup_graphics()
     plotter.set_rtt_instance(rtt)
     plotter.start()
-    plotter.start_log_thread()
+    #plotter.start_log_thread()
     print("Power Profiler Kit running!")
 
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
         QtGui.QApplication.instance().exec_()
+
+if __name__ == '__main__':
+    import profile
+    #import cProfile as profile
+    profile.run('main()')
