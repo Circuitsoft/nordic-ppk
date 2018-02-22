@@ -6,6 +6,7 @@ from libs.rtt import RTT_COMMANDS
 from ui import ppk_settings
 import csv
 import threading
+import time
 
 SAMPLE_INTERVAL = 13.0e-6
 ADC_REF = 0.6
@@ -24,6 +25,7 @@ MEAS_RANGE_MSK = (3 << 14)
 MEAS_ADC_POS = 0
 MEAS_ADC_MSK = 0x3FFF
 
+total_plot_time = 0
 
 class PlotData():
     def __init__(self):
@@ -377,6 +379,8 @@ class ppk_plotter():
 
     # update plots
     def update(self):
+        begin = time.time()
+
         if self.update_trig_curve:
             self.settings.trigger_single_button.setText("Single")
             if (not self.settings.external_trig_enabled):
@@ -389,3 +393,7 @@ class ppk_plotter():
             self.avg_curve.setData(self.plotdata.avg_x,
                 self.plotdata.avg_y[self.plotdata.avg_next:][:self.plotdata.avg_bufsize])
             self.update_avg_curve = False
+
+        global total_plot_time
+        total_plot_time += time.time() - begin
+        print "total_plot_time:", total_plot_time
