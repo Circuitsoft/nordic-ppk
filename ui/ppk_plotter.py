@@ -65,6 +65,9 @@ class PlotData():
         self.vref_lo_init = 0
         self.vdd_init     = 0
 
+        self.avg_next = 0
+        self.trig_next = 0
+
 
 class ppk_plotter():
     def __init__(self):
@@ -236,8 +239,11 @@ class ppk_plotter():
                         s = ''.join([chr(b) for b in data])
                         f = struct.unpack('f', s)[0]        # Get the uA value
 
-                        self.plotdata.avg_y[:-1] = self.plotdata.avg_y[1:]  # shift data in the array one sample left
-                        self.plotdata.avg_y[-1] = f / 1e6
+                        self.plotdata.avg_next += 1  # shift data in the array one sample left
+                        if self.plotdata.avg_next >= self.plotdata.avg_bufsize:
+                            self.plotdata.avg_next = 0
+                            self.plotdata.avg_y[:self.plotdata.avg_bufsize] = self.plotdata.avg_y[-self.plotdata.avg_bufsize:]
+                        self.plotdata.avg_y[self.plotdata.avg_next + self.plotdata.avg_bufsize] = f / 1e6
 
                         self.update_avg_curve = True
 
@@ -256,8 +262,11 @@ class ppk_plotter():
             # Average data received (in microamp)
             s = ''.join([chr(b) for b in data])
             f = struct.unpack('f', s)[0]
-            self.plotdata.avg_y[:-1] = self.plotdata.avg_y[1:]  # shift data in the array one sample left
-            self.plotdata.avg_y[-1] = f / 1e6 - self.global_offset
+            self.plotdata.avg_next += 1  # shift data in the array one sample left
+            if self.plotdata.avg_next >= self.plotdata.avg_bufsize:
+                self.plotdata.avg_next = 0
+                self.plotdata.avg_y[:self.plotdata.avg_bufsize] = self.plotdata.avg_y[-self.plotdata.avg_bufsize:]
+            self.plotdata.avg_y[self.plotdata.avg_next + self.plotdata.avg_bufsize] = f / 1e6 - self.global_offset
 
             self.update_avg_curve = True
 
@@ -314,8 +323,11 @@ class ppk_plotter():
 
                         prev_meas_range = self.plotdata.current_meas_range
 
-                    self.plotdata.trig_y[:-1] = self.plotdata.trig_y[1:]  # shift data in the array one sample left
-                    self.plotdata.trig_y[-1] = sample_A
+                    self.plotdata.trig_next += 1  # shift data in the array one sample left
+                    if self.plotdata.trig_next >= self.plotdata.trig_bufsize:
+                        self.plotdata.trig_next = 0
+                        self.plotdata.trig_y[:self.plotdata.trig_bufsize] = self.plotdata.trig_y[self.plotdata.trig_bufsize:]
+                    self.plotdata.trig_y[self.plotdata.trig_next + self.plotdata.trig_bufsize] = sample_A
 
             # Update the trigger window when we have filled all samples
             self.update_trig_curve = True
@@ -369,9 +381,11 @@ class ppk_plotter():
             self.settings.trigger_single_button.setText("Single")
             if (not self.settings.external_trig_enabled):
                 self.settings.trigger_start_button.setEnabled(True)
-            self.trig_curve.setData(self.plotdata.trig_x, self.plotdata.trig_y[:self.plotdata.trig_bufsize])
+            self.trig_curve.setData(self.plotdata.trig_x,
+                self.plotdata.trig_y[self.plotdata.trig_next:][:self.plotdata.trig_bufsize])
             self.update_trig_curve = False
 
         if self.update_avg_curve:
-            self.avg_curve.setData(self.plotdata.avg_x, self.plotdata.avg_y[:self.plotdata.avg_bufsize])
+            self.avg_curve.setData(self.plotdata.avg_x,
+                self.plotdata.avg_y[self.plotdata.avg_next:][:self.plotdata.avg_bufsize])
             self.update_avg_curve = False
