@@ -201,7 +201,7 @@ class ppk_plotter():
 
         timer = pg.QtCore.QTimer(self.gw)
         timer.timeout.connect(self.update)
-        timer.start(1)  # 10us
+        timer.start(16)  # ~60 Hz
         # Timer to update rms value
         timer_rms = pg.QtCore.QTimer(self.gw)
         timer_rms.timeout.connect(self.settings.update_status)
