@@ -783,7 +783,7 @@ class SettingsWindow(QtCore.QObject):
 
         self.trig_bufsize = int(self.plotdata.trig_timewindow / self.plotdata.trig_interval)
         self.plotdata.trig_x = np.linspace(0.0, self.plotdata.trig_timewindow, self.trig_bufsize)
-        self.plotdata.trig_y = np.zeros(self.trig_bufsize, dtype=np.float)
+        self.plotdata.trig_y = np.zeros(self.trig_bufsize * 2, dtype=np.float)
 
         self.trig_window_label.setText('%5.2f ms' % ((self.plotdata.trig_timewindow * 1000)))
         sys.stdout.flush()
@@ -804,7 +804,7 @@ class SettingsWindow(QtCore.QObject):
 
         self.plotdata.avg_bufsize  = int(self.plotdata.avg_timewindow / (self.plotdata.avg_interval))
         self.plotdata.avg_x = np.linspace(0.0, self.plotdata.avg_timewindow, self.plotdata.avg_bufsize)
-        self.plotdata.avg_y = np.zeros(self.plotdata.avg_bufsize, dtype=np.float)
+        self.plotdata.avg_y = np.zeros(self.plotdata.avg_bufsize * 2, dtype=np.float)
 
         self.avg_window_label.setText('%.2f s' % (self.plotdata.avg_timewindow))
 
@@ -821,7 +821,7 @@ class SettingsWindow(QtCore.QObject):
         self.plotdata.avg_interval   = self.plotdata.sample_interval * avg_samples_val
         self.plotdata.avg_bufsize  = int(self.plotdata.avg_timewindow / self.plotdata.avg_interval)
         self.plotdata.avg_x = np.linspace(0.0, self.plotdata.avg_timewindow, self.plotdata.avg_bufsize)
-        self.plotdata.avg_y = np.zeros(self.plotdata.avg_bufsize, dtype=np.float)
+        self.plotdata.avg_y = np.zeros(self.plotdata.avg_bufsize * 2, dtype=np.float)
 
     def AverageIntervalSliderMoved(self, val):
         self.avg_sample_num_label.setText('%d' % (val * 10))

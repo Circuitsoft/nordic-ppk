@@ -50,9 +50,9 @@ class PlotData():
         self.trig_bufsize = int(self.trig_timewindow / self.trig_interval)
 
         self.avg_x = np.linspace(0.0, self.avg_timewindow, self.avg_bufsize)
-        self.avg_y = np.zeros(self.avg_bufsize, dtype=np.float)
+        self.avg_y = np.zeros(self.avg_bufsize * 2, dtype=np.float)
         self.trig_x = np.linspace(0.0, self.trig_timewindow, self.trig_bufsize)
-        self.trig_y = np.zeros(self.trig_bufsize, dtype=np.float)
+        self.trig_y = np.zeros(self.trig_bufsize * 2, dtype=np.float)
 
         self.trigger_high = self.trigger >> 8
         self.trigger_low = self.trigger & 0xFF
@@ -169,9 +169,9 @@ class ppk_plotter():
         avg_plot.addItem(self.avg_region, ignoreBounds=True)
         trig_plot.addItem(self.trig_region, ignoreBounds=True)
         # Create the curve for average data (top graph)
-        self.avg_curve = avg_plot.plot(self.plotdata.avg_x, self.plotdata.avg_y)
+        self.avg_curve = avg_plot.plot(self.plotdata.avg_x, self.plotdata.avg_y[:self.plotdata.avg_bufsize])
         # Create the curve for trigger data (bottom graph)
-        self.trig_curve = trig_plot.plot(self.plotdata.trig_x, self.plotdata.trig_y)
+        self.trig_curve = trig_plot.plot(self.plotdata.trig_x, self.plotdata.trig_y[:self.plotdata.trig_bufsize])
 
         # Bools for checking if we should update the curve when the update timer triggers
         self.update_trig_curve = False
@@ -250,7 +250,7 @@ class ppk_plotter():
                 self.global_offset = np.average(self.plotdata.avg_y[1000:8000])
                 self.rtt.write_stuffed([RTT_COMMANDS.RTT_CMD_DUT, 1])
                 del self.calibration_counter
-                self.plotdata.avg_y = np.zeros(self.plotdata.avg_bufsize, dtype=np.float)
+                self.plotdata.avg_y = np.zeros(self.plotdata.avg_bufsize * 2, dtype=np.float)
 
         if (len(data) == 4):
             # Average data received (in microamp)
@@ -369,9 +369,9 @@ class ppk_plotter():
             self.settings.trigger_single_button.setText("Single")
             if (not self.settings.external_trig_enabled):
                 self.settings.trigger_start_button.setEnabled(True)
-            self.trig_curve.setData(self.plotdata.trig_x, self.plotdata.trig_y)
+            self.trig_curve.setData(self.plotdata.trig_x, self.plotdata.trig_y[:self.plotdata.trig_bufsize])
             self.update_trig_curve = False
 
         if self.update_avg_curve:
-            self.avg_curve.setData(self.plotdata.avg_x, self.plotdata.avg_y)
+            self.avg_curve.setData(self.plotdata.avg_x, self.plotdata.avg_y[:self.plotdata.avg_bufsize])
             self.update_avg_curve = False
