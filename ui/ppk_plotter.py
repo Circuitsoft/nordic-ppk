@@ -153,12 +153,12 @@ class ppk_plotter():
         self.avg_region.setRegion([0.5, 0.9])
 
     def setup_plot_window(self):
-        self.avg_plot = self.gw.addPlot(title='Average', row=0, col=1, rowspan=1, colspan=1)
+        avg_plot = self.gw.addPlot(title='Average', row=0, col=1, rowspan=1, colspan=1)
         trig_plot = self.gw.addPlot(title='Trigger', row=1, col=1, rowspan=1, colspan=1)
 
-        self.avg_plot.setLabel('left', 'current', 'A')
-        self.avg_plot.setLabel('bottom', 'time', 's')
-        self.avg_plot.showGrid(x=True, y=True)
+        avg_plot.setLabel('left', 'current', 'A')
+        avg_plot.setLabel('bottom', 'time', 's')
+        avg_plot.showGrid(x=True, y=True)
 
         trig_plot.setLabel('left', 'current', 'A')
         trig_plot.setLabel('bottom', 'time', 's')
@@ -166,10 +166,10 @@ class ppk_plotter():
 
         # Add the LinearRegionItem to the ViewBox, but tell the ViewBox to exclude this
         # item when doing auto-range calculations.
-        self.avg_plot.addItem(self.avg_region, ignoreBounds=True)
+        avg_plot.addItem(self.avg_region, ignoreBounds=True)
         trig_plot.addItem(self.trig_region, ignoreBounds=True)
         # Create the curve for average data (top graph)
-        self.avg_curve = self.avg_plot.plot(self.plotdata.avg_x, self.plotdata.avg_y)
+        self.avg_curve = avg_plot.plot(self.plotdata.avg_x, self.plotdata.avg_y)
         # Create the curve for trigger data (bottom graph)
         self.trig_curve = trig_plot.plot(self.plotdata.trig_x, self.plotdata.trig_y)
 
