@@ -79,6 +79,7 @@ class ppk_plotter():
         self.started_log = False
         self.log_stopped = False
         self.update_log = False
+        self.update_log_cond = threading.Condition()
 
     def setup_graphics(self):
         self.setup_measurement_regions()
@@ -123,6 +124,11 @@ class ppk_plotter():
             self.alive = False
         except Exception as e:
             print(str(e))
+        self.update_log_cond.acquire()
+        self.update_log_cond.notify()
+        self.update_log_cond.release()
+        self.log_thread.join()
+        QtGui.QApplication.quit()
 
     def setup_measurement_regions(self):
         # Cursor with window for calculating avereages
@@ -269,7 +275,10 @@ class ppk_plotter():
                 except Exception as e:
                     print(str(e))
             # Just set update log after every sample
+            self.update_log_cond.acquire()
             self.update_log = True
+            self.update_log_cond.notify()
+            self.update_log_cond.release()
 
         else:
             # Trigger data received as raw adc float, with range flag prepended
@@ -315,15 +324,20 @@ class ppk_plotter():
         ts = 0
         while(self.alive):
             try:
-                if(self.update_log and not self.log_stopped):
+                self.update_log_cond.acquire()
+                while not self.update_log:
+                    self.update_log_cond.wait()
+                self.update_log_cond.release()
+                if not self.log_stopped:
                     ts += self.plotdata.avg_interval
                     try:
-                        self.writer.writerow({'Time[s]': '{0:f}'.format(ts), 'Current[uA]': '{0:f}'.format(self.plotdata.avg_y[-1])})
+                        writedat = {'Time[s]': ts, 'Current[uA]': self.plotdata.avg_y[-1]}
+                        self.writer.writerow(writedat)
                         self.update_log = False
                     except:
                         # Exception happens before logging is started, due to no write instance
                         pass
-                if(self.log_stopped):
+                else:
                     ts = 0
                     try:
                         self.logfile.close()
